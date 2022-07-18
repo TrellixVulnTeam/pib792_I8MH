@@ -107,13 +107,27 @@ blast <- blast[, list(chromosome = chromosome, index = seq(start, stop)), by = c
 # Small type error...
 blast$chromosome <- as.character(blast$chromosome)
 
+# Get the BLAST results filename from the end of the 
+# path.
+blast_name <- strsplit(opt$`blast-matches`, '/')[[1]]
+blast_name <- blast_name[length(blast_name)]
+blast_name <- paste(c(blast_name, '.compare'), collapse = '')
+
+# Get the peak filename from the end of the
+# path.
+peak <- strsplit(opt$`peaks`, '/')[[1]]
+peak <- peak[length(peak)]
+
+# Combine the two names to make one filename.
+combined_name <- paste(c(blast_name, peak), collapse = '-')
+
 # Write what matches.
 write.table(
-    x = blast[peaks, on = c('chromosome', 'index')],
+    x = blast[peaks, on = c('chromosome', 'index'), nomatch = NULL],
     file = paste(
         c(
             opt$`write-to`, 
-            'BLAST.peaks.matched'
+            combined_name
         ), 
         collapse = ''
     ),

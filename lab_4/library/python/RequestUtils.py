@@ -8,7 +8,13 @@
 # Web requests
 import requests
 
-from OSUtils import OSUtils
+from . import OSUtils
+
+
+
+
+# Universal instantations
+OU = OSUtils.OSUtils()
 
 
 
@@ -91,50 +97,3 @@ class RequestUtils:
         
         # Can download the URL.
         return True
-
-
-
-
-# Instantations.
-OU = OSUtils()
-RU = RequestUtils()
-
-# The URL to try.
-dwnld = 'https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE116334&format=file'
-
-# Establish where to download URLs.
-url_path = OU.pathalize(
-    pth = './'
-)
-
-# Can we even download the URL?
-RU.is_downloadable(
-    url = dwnld
-)
-
-# If so, download the URL.
-RU.download_url(
-    where = url_path,
-    url = dwnld
-)
-
-# Decompress the tar.
-OU.decompress_tar(
-    source_file = RU.filename_from_url(
-        url = dwnld
-    ),
-    where = url_path
-)
-
-# Decompress each of the .gz files.
-for f in OU.file_list_by_extension(
-    p = OU.homogenize_path(
-            p = '/home/helios/Desktop/workspace/pib792/library'
-        ), 
-    xtnsn = 'gz'
-    ):
-        
-        OU.decompress_gzip(
-            source_file = f,
-            where = url_path
-        )
