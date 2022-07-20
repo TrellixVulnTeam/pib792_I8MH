@@ -58,7 +58,9 @@ opt <- parse_args(
 
 # Split the motifs on any space, then trim.
 opt$`motifs` <- strsplit(opt$`motifs`, ' ')[[1]]
-opt$`motifs` <- unlist(lapply(opt$`motifs`, function(x) if(length(x) > 0) {x.trimws()}))
+
+# TODO: more general solution to treat poorly-provided arguments...
+# opt$`motifs` <- unlist(lapply(opt$`motifs`, function(x) if(length(x) > 0) {x.trimws()}))
 
 print(opt$`motifs` == c('ACAGTGATT', 'AGGAGGCTC', 'GGGCTTCCTGCG'))
 
