@@ -61,11 +61,7 @@ opt$`motifs` <- strsplit(opt$`motifs`, ' ')[[1]]
 
 # TODO: more general solution to treat poorly-provided arguments...
 # opt$`motifs` <- unlist(lapply(opt$`motifs`, function(x) if(length(x) > 0) {x.trimws()}))
-
-print(opt$`motifs` == c('ACAGTGATT', 'AGGAGGCTC', 'GGGCTTCCTGCG'))
-
 print(opt)
-print(x)
 
 # Testing only start.
 
