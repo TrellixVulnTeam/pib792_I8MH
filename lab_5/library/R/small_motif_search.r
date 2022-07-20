@@ -56,7 +56,14 @@ opt <- parse_args(
     opt_parser
 )
 
+# Split the motifs on any space, then trim.
+opt$`motifs` <- strsplit(' ')[[1]]
+opt$`motifs` <- c(unlist(lapply(opt$`motifs`, function(x) if(length(x) > 0) {x.trimws()})))
+
+print(opt$`motifs` == c('ACAGTGATT', 'AGGAGGCTC', 'GGGCTTCCTGCG'))
+
 print(opt)
+print(x)
 
 # Testing only start.
 
