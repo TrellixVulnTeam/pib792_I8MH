@@ -56,13 +56,15 @@ opt <- parse_args(
     opt_parser
 )
 
+print(opt)
+
 # Testing only start.
 
-opt <- list()
+# opt <- list()
 
-opt$`genome` <- '/home/aeros/analyses/genomes/a_thaliana/ensembl/Arabidopsis_thaliana.TAIR10.dna.toplevel.fa'
-opt$`motifs` <- c('ACAGTGATT', 'AGGAGGCTC', 'GGGCTTCCTGCG')
-opt$`write-to` <- './'
+# opt$`genome` <- '/home/aeros/analyses/genomes/a_thaliana/ensembl/Arabidopsis_thaliana.TAIR10.dna.toplevel.fa'
+# opt$`motifs` <- c('ACAGTGATT', 'AGGAGGCTC', 'GGGCTTCCTGCG')
+# opt$`write-to` <- './'
 
 # Testing only end.
 
