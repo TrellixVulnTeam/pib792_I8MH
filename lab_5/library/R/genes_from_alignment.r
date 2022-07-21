@@ -21,7 +21,7 @@ library(optparse)
 options <- list(
     make_option(
         c(
-            '-g', '--genome-location'
+            '-g', '--genome'
         ),
         type = 'character',
         default = './',
@@ -62,6 +62,17 @@ opt <- parse_args(
     opt_parser
 )
 
+# Testing only start.
+
+# opt <- list()
+
+# opt$`genome` <- '/home/aeros/analyses/genomes/a_thaliana/from_chris/from_chris456w0oiatmp'
+# opt$`location` <- '/home/aeros/analyses/lab_5/batches/578aca5b-eca1-4585-9fa4-422e304ae641/treatment_match/'
+# opt$`regex` <- 'peaks'
+# opt$`write-to` <- './'
+
+# Testing only end.
+
 # Homogenize the locations.
 if(substr(opt$location, nchar(opt$location), nchar(opt$location)) != '/') {
     opt$location <- paste(c(opt$location, '/'), collapse = '')
@@ -72,8 +83,8 @@ if(substr(opt$`write-to`, nchar(opt$`write-to`), nchar(opt$`write-to`)) != '/') 
 }
 
 # Do we have valid locations?
-if(!file.exists(opt$`genome-location`)) {
-    cat(paste(c('\nThe path provided for -g/--genome-location (\'', opt$`genome-location`, '\') was not found!  \n\nQuitting...\n\n'), collapse = ''))
+if(!file.exists(opt$`genome`)) {
+    cat(paste(c('\nThe path provided for -g/--genome (\'', opt$`genome`, '\') was not found!  \n\nQuitting...\n\n'), collapse = ''))
     return(-1)
 }
 
@@ -105,44 +116,54 @@ if(length(peaks) == 0) {
 }
 
 # Load the genome.
-# genome <- setDT(
-#     read.table(
-#         file = opt$`genome-location`,
-#         sep = '\t',
-#         stringsAsFactors = FALSE
-#     )
-# )
+genome <- setDT(
+    read.table(
+        file = opt$`genome`,
+        header = TRUE,
+        sep = '\t',
+        stringsAsFactors = FALSE
+    )
+)
 
-# Load the peaks.
-peaks <- lapply(peaks, function(peak) {
+# Load the peaks and align them to the genome.
+lapply(peaks, function(peak) {
 
     # Read the peak file.
-    setDT(
+    peak_file <- setDT(
         read.table(
             file = paste(c(opt$location, peak), collapse = ''),
+            header = TRUE,
             sep = '\t',
             stringsAsFactors = FALSE
         )
     )
 
-    # Align the peak file to the genome.
-    # ...
+    # Slight error in type..
+    peak_file$chromosome <- as.character(peak_file$chromosome)
+    peak_file$index <- as.character(peak_file$index)
+    peak_file$strand <- as.character(peak_file$strand)
 
-    # Save the gene names only.
+    # Align the peak file to the genome (inner join) and write out
+    # the match position along with the gene name.
 
-    # # Write out the gene names
-    # write.table(
-    #     x = control_only,
-    #     file = paste(
-    #         c(
-    #             opt$`write-to`, 
-    #             'control_only.m6a.peaks'
-    #         ), 
-    #         collapse = ''
-    #     ),
-    #     quote = FALSE,
-    #     sep = '\t',
-    #     row.names = FALSE
-    # )
+    # Make the file name based on the peaks file.
+    file_split <- strsplit(x = peak, split = '.', fixed = TRUE)[[1]]
+    motif <- file_split[1]
+    category <- strsplit(x = file_split[4], split = '-')[[1]][2]
+    file_name <- paste(c(motif, category, 'genome_align'), collapse = '.')
+
+    write.table(
+        x = peak_file[genome, on = c('chromosome', 'index', 'strand'), nomatch = NULL],
+        file = paste(
+            c(
+                opt$`write-to`,
+                file_name
+            ), 
+            collapse = ''
+        ),
+        quote = FALSE,
+        sep = '\t',
+        row.names = FALSE
+    )
 
 })
