@@ -141,9 +141,9 @@ lapply(peaks, function(peak) {
         )
     )
 
-    # Slight error in type..
-    peak_file$chromosome <- as.character(peak_file$chromosome)
-    peak_file$index <- as.character(peak_file$index)
+    # Slight error in types..
+    peak_file$chromosome <- as.integer(peak_file$chromosome)
+    peak_file$index <- as.integer(peak_file$index)
     peak_file$strand <- as.character(peak_file$strand)
 
     # Make the file name based on the peaks file.
