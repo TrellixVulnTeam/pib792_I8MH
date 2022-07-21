@@ -125,6 +125,9 @@ genome <- setDT(
     )
 )
 
+print(genome)
+print(peaks)
+
 # Load the peaks and align them to the genome.
 lapply(peaks, function(peak) {
 
