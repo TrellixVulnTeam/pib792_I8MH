@@ -61,7 +61,7 @@ opt$`motifs` <- strsplit(opt$`motifs`, ' ')[[1]]
 
 # TODO: more general solution to treat poorly-provided arguments...
 # opt$`motifs` <- unlist(lapply(opt$`motifs`, function(x) if(length(x) > 0) {x.trimws()}))
-print(opt)
+# print(opt)
 
 # Testing only start.
 
@@ -81,6 +81,9 @@ invert_motif <- function(x) {
     # Split up the motif, then go through each
     # nucleotide and invert it.
     split_up <- strsplit(x, '')[[1]]
+
+    # Need to reverse so that we have opposite strand.
+    split_up <- rev(split_up)
 
     split_up <- unlist(lapply(split_up, function(y) {
 
@@ -155,8 +158,13 @@ for(motif in opt$`motifs`) {
     
     # Parallel lapply.
 
+    # Set the motif name in the list.
+    matches[[motif]] <- c()
+
     # Original motif and its inversion.
-    matches[[motif]] <- mclapply(seq(1, 5), function(x) grep(paste(c(motif, invert_motif(x = motif)), collapse = '|'), chromosomes[[x]]), mc.cores = detectCores())
+    matches[[motif]]$positive_strand <- mclapply(seq(1, 5), function(x) grep(motif, chromosomes[[x]]), mc.cores = detectCores())
+
+    matches[[motif]]$negative_strand <- mclapply(seq(1, 5), function(x) grep(invert_motif(x = motif), chromosomes[[x]]), mc.cores = detectCores())
 
 }
 
@@ -168,36 +176,55 @@ lapply(names(matches), function(motif) {
 
     # Create a data table with all of the match
     # information.
-    by_chromosome <- lapply(seq_along(matches[[motif]]), function(x) {
 
-        # Establish which chromosome we're pulling matches from.
-        c_number <- x
+    # Make a list to hold the strand results from
+    # this step.
+    results <- list()
 
-        # Only write anything if we have anything.
-        if(length(matches[[motif]][[c_number]]) > 0) {
-            
-            # Make a data table with the start and stop information.
-            starts_stops <- setDT(
-                data.frame(
-                    chromosome = c_number,
-                    start = matches[[motif]][[c_number]]
+    # Go over both the positive strand and the negative
+    # strand matches.
+    for(strand in c('positive_strand', 'negative_strand')) {
+
+        by_chromosome <- lapply(seq_along(matches[[motif]][[strand]]), function(x) {
+
+            # Establish which chromosome we're pulling matches from.
+            c_number <- x
+
+            # Only write anything if we have anything.
+            if(length(matches[[motif]][[strand]][[c_number]]) > 0) {
+                
+                # Make a data table with the start and stop information.
+                starts_stops <- setDT(
+                    data.frame(
+                        chromosome = c_number,
+                        start = matches[[motif]][[strand]][[c_number]]
+                    )
                 )
-            )
 
-            # The stop position is based on the length of the motif.
-            starts_stops$stop <- starts_stops$start + nchar(motif) - 1
+                # The stop position is based on the strand and 
+                # length of the motif.
+                if(strand == 'positive_strand') {
+                    starts_stops$stop <- starts_stops$start + nchar(motif) - 1
+                } else {
+                    starts_stops$stop <- starts_stops$start - nchar(motif) + 1
+                }
 
-            starts_stops
-                    
-        }
-    })
+                # Add the strand.
+                starts_stops$strand = ifelse(strand == 'positive_strand', '+', '-')
 
-    # Collapse.
-    by_chromosome <- data.table::rbindlist(by_chromosome)
+                starts_stops
+                        
+            }
+        })
+
+        # Collapse.
+        results[[strand]] <- data.table::rbindlist(by_chromosome)
+
+    }
     
     # Write the table.
     write.table(
-        x = by_chromosome,
+        x = data.table::rbindlist(results),
         file = paste(
             c(
                 opt$`write-to`, 
