@@ -143,15 +143,14 @@ lapply(peaks, function(peak) {
     peak_file$index <- as.character(peak_file$index)
     peak_file$strand <- as.character(peak_file$strand)
 
-    # Align the peak file to the genome (inner join) and write out
-    # the match position along with the gene name.
-
     # Make the file name based on the peaks file.
     file_split <- strsplit(x = peak, split = '.', fixed = TRUE)[[1]]
     motif <- file_split[1]
     category <- strsplit(x = file_split[4], split = '-')[[1]][2]
     file_name <- paste(c(motif, category, 'genome_align'), collapse = '.')
 
+    # Align the peak file to the genome (inner join) and write out
+    # the match position along with the gene name.
     write.table(
         x = peak_file[genome, on = c('chromosome', 'index', 'strand'), nomatch = NULL],
         file = paste(
